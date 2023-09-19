@@ -40,7 +40,7 @@ const showNews = (data,catagory_name) => {
                             <p class="card-text">${data.details.slice(0, 200)}</p</>...
                         </div>
                         <div class=" bg-transparent ">
-                           <div class="d-flex justify-content-between align-items-center p-3">
+                           <div class="d-flex justify-content-between align-items-center p-3 m-0">
                                 <div class="d-flex justify-content-center align-items-center gap-2">
                                      <img src="${data.author.img}" class="img-fluid rounded-circle" alt="..." height="40px" width="40px">
                                      <div class=" d-flex flex-column">
@@ -48,9 +48,12 @@ const showNews = (data,catagory_name) => {
                                         <p class="card-text">${data.author.published_date ? data.author.published_date : "Not Available"}</p</>
                                     </div> 
                                 </div>
-                                <p ><i class="fa-regular fa-eye"></i> ${data.total_view ? data.total_view + "M" : "Not Available"}</p>
-                                 <div>
-                                    <i class="fa-regular fa-star"></i>
+                                <p class="m-0 p-0"><i class="fa-regular fa-eye"></i> ${data.total_view ? data.total_view + "M" : "Not Available"}</p>
+                                 <div class="d-flex align-items-center justify-content-center gap-1 m-0 p-0">
+                                     <div>
+                                        ${generateRatings(data.rating.number)}
+                                     </div>
+                                        <p class="m-0 p-0">  ${data.rating.number}</p>
                                  </div>
                                  <i class="fa-solid fa-arrow-right" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="showModal('${data._id}')"></i>
 
@@ -70,7 +73,7 @@ const showModal = id => {
 
     fetch(`https://openapi.programming-hero.com/api/news/${id}`).then(res => res.json())
         .then(data => {
-            const { image_url, title, details, author, total_view } = data.data[0];
+            const { image_url, title, details, author, total_view ,rating} = data.data[0];
             console.log(data)
             document.getElementById('modal-body').innerHTML = `
         <div class="card mb-3 container my-3" style="">
@@ -92,9 +95,9 @@ const showModal = id => {
                                         <p class="card-text">${author.published_date ? author.published_date : "Not Available"}</p</>
                                     </div> 
                                 </div>
-                                <p ><i class="fa-regular fa-eye"></i> ${total_view ? total_view + "M" : "Not Available"} </p>
+                                <p class="m-0 p-0"><i class="fa-regular fa-eye"></i> ${total_view ? total_view + "M" : "Not Available"} </p>
                                  <div>
-                                    <i class="fa-regular fa-star"></i>
+                                    ${generateRatings(rating.number)}
                                  </div>
 
                           </div> 
@@ -118,3 +121,15 @@ document.getElementById('today-pick').addEventListener('click', function () {
     showNews(todaysPick, catagoryName);
 
 });
+fetchCatagoriesData('01','Breaking News');
+const generateRatings= rating =>{
+    let ratingStar='';
+
+    for(let i=0;i<Math.floor(rating);i++){
+        ratingStar +='<i class="fa-solid fa-star"></i>'
+    }
+    if(Math.floor(rating)<rating){
+        ratingStar+='<i class="fa-solid fa-star-half-stroke"></i>'
+    }
+    return ratingStar;
+}
