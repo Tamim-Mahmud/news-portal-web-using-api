@@ -1,3 +1,4 @@
+let fetchedData = [];
 const loadCatagories = () => {
     fetch('https://openapi.programming-hero.com/api/news/categories').then(res => res.json()).then(data => showCatagories(data.data.news_category));
 }
@@ -5,22 +6,29 @@ const loadCatagories = () => {
 const showCatagories = data => {
     // console.log(data.length);
     data.forEach(data => {
-        document.getElementById('catagorical-data').innerHTML += `<a role="button" onclick ="showNews('${data.category_id}','${data.category_name}')">${data.category_name}</a>`;
+        document.getElementById('catagorical-data').innerHTML += `<a role="button" onclick ="fetchCatagoriesData('${data.category_id}','${data.category_name}')">${data.category_name}</a>`;
     });
 
 };
+const fetchCatagoriesData = (catagory_id, catagory_name) => {
+    fetch(`https://openapi.programming-hero.com/api/news/category/${catagory_id}`).then(res => res.json())
+        .then(data => {
+            showNews(data.data,catagory_name)
+            fetchedData = data.data;
+         })
+}
 
-const showNews = (catagory_id, catagory_name) => {
-    fetch(`https://openapi.programming-hero.com/api/news/category/${catagory_id}`).then(res => res.json()).then(data => {
-        document.getElementById('catagories-num').innerText = data.data.length;
-        // console.log(data.data.length);
-        document.getElementById('catagoris-name').innerText = catagory_name;
-        document.getElementById('news-cart').innerHTML = '';
+const showNews = (data,catagory_name) => {
+
+    document.getElementById('catagories-num').innerText = data.length;
+    console.log(data.length);
+    document.getElementById('catagoris-name').innerText = catagory_name;
+    document.getElementById('news-cart').innerHTML = '';
 
 
-        data.data.forEach(data => {
-            // console.log(data.thumbnail_url)
-            document.getElementById('news-cart').innerHTML += `
+    data.forEach(data => {
+        // console.log(data.thumbnail_url)
+        document.getElementById('news-cart').innerHTML += `
             <div class="card mb-3 container my-3" style="">
                 <div class="row g-0">
                     <div class="col-md-4">
@@ -28,7 +36,7 @@ const showNews = (catagory_id, catagory_name) => {
                     </div>
                     <div class="col-md-8 d-flex flex-column justify-content-around">
                         <div class="card-body">
-                            <h5 class="card-title">${data.title}</h5>
+                            <h5 class="card-title">${data.title}<span class="badge text-bg-danger"> ${data.others_info.is_trending ? "Trending" : ""}</span></h5>
                             <p class="card-text">${data.details.slice(0, 200)}</p</>...
                         </div>
                         <div class=" bg-transparent ">
@@ -36,11 +44,11 @@ const showNews = (catagory_id, catagory_name) => {
                                 <div class="d-flex justify-content-center align-items-center gap-2">
                                      <img src="${data.author.img}" class="img-fluid rounded-circle" alt="..." height="40px" width="40px">
                                      <div class=" d-flex flex-column">
-                                        <p class="card-text m-0 p-0">${data.author.name}</p</>
-                                        <p class="card-text">${data.author.published_date}</p</>
+                                        <p class="card-text m-0 p-0">${data.author.name ? data.author.name : "Not Available"}</p</>
+                                        <p class="card-text">${data.author.published_date ? data.author.published_date : "Not Available"}</p</>
                                     </div> 
                                 </div>
-                                <p ><i class="fa-regular fa-eye"></i> ${data.total_view} M</p>
+                                <p ><i class="fa-regular fa-eye"></i> ${data.total_view ? data.total_view + "M" : "Not Available"}</p>
                                  <div>
                                     <i class="fa-regular fa-star"></i>
                                  </div>
@@ -53,18 +61,18 @@ const showNews = (catagory_id, catagory_name) => {
                 
             </div>
             `
-        })
     })
 
 
+
 };
-const showModal = id =>{
-    
-    fetch(`https://openapi.programming-hero.com/api/news/${id}`).then(res =>res.json())
-    .then(data =>{
-        const {image_url,title,details,author,total_view} = data.data[0];
-        console.log(data)
-        document.getElementById('modal-body').innerHTML = `
+const showModal = id => {
+
+    fetch(`https://openapi.programming-hero.com/api/news/${id}`).then(res => res.json())
+        .then(data => {
+            const { image_url, title, details, author, total_view } = data.data[0];
+            console.log(data)
+            document.getElementById('modal-body').innerHTML = `
         <div class="card mb-3 container my-3" style="">
                 <div class="row g-0">
                     <div class="col-md-12">
@@ -80,11 +88,11 @@ const showModal = id =>{
                                 <div class="d-flex justify-content-center align-items-center gap-2">
                                      <img src="${author.img}" class="img-fluid rounded-circle" alt="..." height="40px" width="40px">
                                      <div class=" d-flex flex-column">
-                                        <p class="card-text m-0 p-0">${author.name}</p</>
-                                        <p class="card-text">${author.published_date}</p</>
+                                        <p class="card-text m-0 p-0">${author.name ? author.name : "NOt Available"}</p</>
+                                        <p class="card-text">${author.published_date ? author.published_date : "Not Available"}</p</>
                                     </div> 
                                 </div>
-                                <p ><i class="fa-regular fa-eye"></i> ${total_view} M</p>
+                                <p ><i class="fa-regular fa-eye"></i> ${total_view ? total_view + "M" : "Not Available"} </p>
                                  <div>
                                     <i class="fa-regular fa-star"></i>
                                  </div>
@@ -96,7 +104,17 @@ const showModal = id =>{
                 
             </div>
         `
-    })
-
-
+        })
 }
+document.getElementById('trending').addEventListener('click', function () {
+    const todaysPick = fetchedData.filter(data => data.others_info.is_trending);
+    const catagoryName = document.getElementById('catagoris-name').innerText;
+    showNews(todaysPick, catagoryName);
+
+});
+document.getElementById('today-pick').addEventListener('click', function () {
+    const todaysPick = fetchedData.filter(data => data.others_info.is_todays_pick);
+    const catagoryName = document.getElementById('catagoris-name').innerText;
+    showNews(todaysPick, catagoryName);
+
+});
