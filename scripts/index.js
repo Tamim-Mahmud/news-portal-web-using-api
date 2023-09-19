@@ -44,7 +44,7 @@ const showNews = (catagory_id, catagory_name) => {
                                  <div>
                                     <i class="fa-regular fa-star"></i>
                                  </div>
-                                 <i class="fa-solid fa-arrow-right"></i>
+                                 <i class="fa-solid fa-arrow-right" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="showModal('${data._id}')"></i>
 
                           </div> 
                         </div>
@@ -58,3 +58,45 @@ const showNews = (catagory_id, catagory_name) => {
 
 
 };
+const showModal = id =>{
+    
+    fetch(`https://openapi.programming-hero.com/api/news/${id}`).then(res =>res.json())
+    .then(data =>{
+        const {image_url,title,details,author,total_view} = data.data[0];
+        console.log(data)
+        document.getElementById('modal-body').innerHTML = `
+        <div class="card mb-3 container my-3" style="">
+                <div class="row g-0">
+                    <div class="col-md-12">
+                        <img src="${image_url}" class="img-fluid rounded-start" alt="...">
+                    </div>
+                    <div class="col-md-12 d-flex flex-column justify-content-around">
+                        <div class="card-body">
+                            <h5 class="card-title">${title}</h5>
+                            <p class="card-text">${details}</p</>
+                        </div>
+                        <div class=" bg-transparent ">
+                           <div class="d-flex justify-content-between align-items-center p-3">
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                     <img src="${author.img}" class="img-fluid rounded-circle" alt="..." height="40px" width="40px">
+                                     <div class=" d-flex flex-column">
+                                        <p class="card-text m-0 p-0">${author.name}</p</>
+                                        <p class="card-text">${author.published_date}</p</>
+                                    </div> 
+                                </div>
+                                <p ><i class="fa-regular fa-eye"></i> ${total_view} M</p>
+                                 <div>
+                                    <i class="fa-regular fa-star"></i>
+                                 </div>
+
+                          </div> 
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        `
+    })
+
+
+}
